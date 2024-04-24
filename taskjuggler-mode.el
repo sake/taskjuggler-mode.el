@@ -24,7 +24,7 @@
 ;;; Commentary:
 ;; This is a major mode which can be used to write files for
 ;; taskjuggler.  See http://www.taskjuggler.org for that scheduling
-;; software. 
+;; software.
 ;; The version 2.4.1 of taskjuggler shipped with a tiny emacs lisp
 ;; file called taskjug.el.  From this I have taken the indentation
 ;; function.  All the rest was written from scratch, thus the new name
@@ -159,7 +159,7 @@ Used for font-lock.")
     "csvtaskreport"
     "htmlaccountreport"
     "htmlmonthlycalendar"
-    "htmlresourcereport" 
+    "htmlresourcereport"
     "htmltaskreport"
     "htmlstatusreport"
     "htmlweeklycalendar"
@@ -215,12 +215,12 @@ Used for font-lock.")
   '("allocate"
     "responsible"
     "alternative")
-  "Keywords after which a resource may follow.  
+  "Keywords after which a resource may follow.
 Used when completing resources.")
 
 
 
-(defvar taskjuggler-font-lock-keywords 
+(defvar taskjuggler-font-lock-keywords
   (list
    (cons (regexp-opt taskjuggler-properties 'words) font-lock-function-name-face)
    (cons (regexp-opt taskjuggler-attributes 'words) font-lock-keyword-face)
@@ -235,7 +235,7 @@ Used when completing resources.")
 (defun taskjuggler-indent-line ()
   "Indent current line as taskjuggler code.
 
-This function was taken from taskjug.el which shipped with 
+This function was taken from taskjug.el which shipped with
 Taskjuggler 2.4.1.  Maybe it could be re-written to use
 `taskjuggler-parser'."
   (interactive)
@@ -244,33 +244,33 @@ Taskjuggler 2.4.1.  Maybe it could be re-written to use
       (indent-line-to 0)           ; First line is always non-indented
     (let ((not-indented t) cur-indent)
       (if (looking-at "^[ \t]*}") ; If the line we are looking at is the end of a block, then decrease the indentation
-          (progn
-            (save-excursion
-              (forward-line -1)
-              (if (looking-at "^.*{")
-                  (setq cur-indent (current-indentation)) ; Empty block, keep the same level
-                (setq cur-indent (- (current-indentation) tab-width))))
-            (if (< cur-indent 0) ; We can't indent past the left margin
-                (setq cur-indent 0)))
-        
-        (save-excursion
-          (while not-indented ; Iterate backwards until we find an indentation hint
-            (forward-line -1)
-            (if (looking-at "^.*}") ; This hint indicates that we need to indent at the level of the } token
-                (progn
-                  (setq cur-indent (current-indentation))
-                  (setq not-indented nil))
-              
-              (if (looking-at "^.*{") ;This hint indicates that we need to indent an extra level
-                  (progn
-                    (setq cur-indent (+ (current-indentation) tab-width)) ; Do the actual indenting
-                    (setq not-indented nil))
-                (if (bobp)
-                    (setq not-indented nil)))))))
-      
+	  (progn
+	    (save-excursion
+	      (forward-line -1)
+	      (if (looking-at "^.*{")
+		  (setq cur-indent (current-indentation)) ; Empty block, keep the same level
+		(setq cur-indent (- (current-indentation) tab-width))))
+	    (if (< cur-indent 0) ; We can't indent past the left margin
+		(setq cur-indent 0)))
+
+	(save-excursion
+	  (while not-indented ; Iterate backwards until we find an indentation hint
+	    (forward-line -1)
+	    (if (looking-at "^.*}") ; This hint indicates that we need to indent at the level of the } token
+		(progn
+		  (setq cur-indent (current-indentation))
+		  (setq not-indented nil))
+
+	      (if (looking-at "^.*{") ;This hint indicates that we need to indent an extra level
+		  (progn
+		    (setq cur-indent (+ (current-indentation) tab-width)) ; Do the actual indenting
+		    (setq not-indented nil))
+		(if (bobp)
+		    (setq not-indented nil)))))))
+
       (if cur-indent
-          (indent-line-to cur-indent)
-        (indent-line-to 0))))) ; If we didn't see an indentation hint, then allow no indentation
+	  (indent-line-to cur-indent)
+	(indent-line-to 0))))) ; If we didn't see an indentation hint, then allow no indentation
 
 (defvar taskjuggler-tasks ()
   "A list of all tasks found in the buffer.
@@ -301,7 +301,7 @@ The items on this list are lists of the form
 (defun taskjuggler-parser (&optional limit request verbose)
   "The core of this mode.  Parses a taskjuggler file.
 
-LIMIT can be used if parsing should end at that position.  
+LIMIT can be used if parsing should end at that position.
 
 Request is one of the following:
 nil           return task tree
@@ -311,73 +311,73 @@ nil           return task tree
 'path-as-list return the (task)-context at LIMIT as a list
 "
   (let ((lim (or limit (point-max)))
-        (path ())
-        (hierarchy 0)
-        (task-tree ())
-        (res-tree ())
-        (task-hierarchy 0)
-        (res-hierarchy 0))
-    (save-excursion 
+	(path ())
+	(hierarchy 0)
+	(task-tree ())
+	(res-tree ())
+	(task-hierarchy 0)
+	(res-hierarchy 0))
+    (save-excursion
       (when verbose (message "Limit: %s" lim))
       (goto-char (point-min))
       (while (and (not (eobp))
-                  (< (point) lim))
-        (when (looking-at "{")
-          (setq hierarchy (1+ hierarchy))
-          (when verbose (message "hierarchy+ %d" hierarchy)))
-        (when (looking-at "}")
-          (when (= hierarchy task-hierarchy)
-            (setq path (cdr path))
-            (setq task-hierarchy (1- task-hierarchy)))
-          (when (= hierarchy res-hierarchy)
-            (setq path (cdr path))
-            (setq res-hierarchy (1- res-hierarchy)))
-          (setq hierarchy (1- hierarchy))
-          (when verbose (message "hierarchy- %d" hierarchy)))
-        (cond
-         ;; comments
-         ((looking-at "#")
-          (when verbose (message "Comment"))
-          (while (not (eolp)) (forward-char 1)))
-         ((looking-at "/\\*")
-          (search-forward "*/"))
-         ((looking-at (concat
-                       "task\\s-+\\("
-                       taskjuggler-name-re
-                       "\\)\\s-+\"\\([^\"]+\\)\"\\s-*{"))
-          (setq task-hierarchy (1+ hierarchy))
-          (setq path (cons (match-string-no-properties 1) path))
-          (when verbose (message "task(%d) %s" task-hierarchy 
-                                 (taskjuggler-make-path path)))
-          (setq task-tree
-                (cons (list (taskjuggler-make-path path)
-                            task-hierarchy
-                            (match-string-no-properties 1)
-                            (match-string-no-properties 2))
-                      task-tree))
-          (goto-char (match-end 0))
-          (forward-char -2))
-         ((looking-at (concat
-                       "resource\\s-+\\("
-                       taskjuggler-name-re
-                       "\\)\\s-+\"\\([^\"]+\\)\"\\s-*{"))
-          (setq res-hierarchy (1+ hierarchy))
-          (setq path (cons (match-string-no-properties 1) path))
-          (when verbose (message "resource(%d) %s" res-hierarchy 
-                                 (taskjuggler-make-path path)))
-          (setq res-tree
-                (cons (list (taskjuggler-make-path path)
-                            res-hierarchy
-                            (match-string-no-properties 1)
-                            (match-string-no-properties 2))
-                      res-tree))
-          (goto-char (match-end 0))
-          (forward-char -2)))
-        (forward-char 1)
-        ))
+		  (< (point) lim))
+	(when (looking-at "{")
+	  (setq hierarchy (1+ hierarchy))
+	  (when verbose (message "hierarchy+ %d" hierarchy)))
+	(when (looking-at "}")
+	  (when (= hierarchy task-hierarchy)
+	    (setq path (cdr path))
+	    (setq task-hierarchy (1- task-hierarchy)))
+	  (when (= hierarchy res-hierarchy)
+	    (setq path (cdr path))
+	    (setq res-hierarchy (1- res-hierarchy)))
+	  (setq hierarchy (1- hierarchy))
+	  (when verbose (message "hierarchy- %d" hierarchy)))
+	(cond
+	 ;; comments
+	 ((looking-at "#")
+	  (when verbose (message "Comment"))
+	  (while (not (eolp)) (forward-char 1)))
+	 ((looking-at "/\\*")
+	  (search-forward "*/"))
+	 ((looking-at (concat
+		       "task\\s-+\\("
+		       taskjuggler-name-re
+		       "\\)\\s-+\"\\([^\"]+\\)\"\\s-*{"))
+	  (setq task-hierarchy (1+ hierarchy))
+	  (setq path (cons (match-string-no-properties 1) path))
+	  (when verbose (message "task(%d) %s" task-hierarchy
+				 (taskjuggler-make-path path)))
+	  (setq task-tree
+		(cons (list (taskjuggler-make-path path)
+			    task-hierarchy
+			    (match-string-no-properties 1)
+			    (match-string-no-properties 2))
+		      task-tree))
+	  (goto-char (match-end 0))
+	  (forward-char -2))
+	 ((looking-at (concat
+		       "resource\\s-+\\("
+		       taskjuggler-name-re
+		       "\\)\\s-+\"\\([^\"]+\\)\"\\s-*{"))
+	  (setq res-hierarchy (1+ hierarchy))
+	  (setq path (cons (match-string-no-properties 1) path))
+	  (when verbose (message "resource(%d) %s" res-hierarchy
+				 (taskjuggler-make-path path)))
+	  (setq res-tree
+		(cons (list (taskjuggler-make-path path)
+			    res-hierarchy
+			    (match-string-no-properties 1)
+			    (match-string-no-properties 2))
+		      res-tree))
+	  (goto-char (match-end 0))
+	  (forward-char -2)))
+	(forward-char 1)
+	))
     (cond
      ((or (null request)
-          (eq request 'tasktree))
+	  (eq request 'tasktree))
       (reverse task-tree))
      ((eq request 'resourcetree)
       (reverse res-tree))
@@ -413,15 +413,15 @@ nil           return task tree
 (defun taskjuggler-read-up-hier-at-point ()
   "Read the number of exclamation marks in current logical expression."
   (let ((excl-count 0)
-        (start-pos (point)))
+	(start-pos (point)))
     (save-excursion
       (forward-char -1)
       (while (not (looking-at "\\s-"))
-        (forward-char -1))
+	(forward-char -1))
       (while (< (point) start-pos)
-        (when (looking-at "!")
-          (setq excl-count (1+ excl-count)))
-        (forward-char 1)))
+	(when (looking-at "!")
+	  (setq excl-count (1+ excl-count)))
+	(forward-char 1)))
     excl-count))
 
 
@@ -440,18 +440,18 @@ a.b.c             (a b)           !c
 a.b.c             (d e f)         !!!a.b.c
 "
   (let ((l1 (split-string target-task-path  "\\."))
-        (l2 (split-string context-path "\\."))
-        (continue-flag t))
+	(l2 (split-string context-path "\\."))
+	(continue-flag t))
     (while (and l1 l1 continue-flag)
       (setq li1 (first l1))
       (setq li2 (first l2))
       (if (not (string-equal li1 li2))
-          (setq continue-flag nil)
-        (progn
-          (setq l1 (cdr l1))
-          (setq l2 (cdr l2)))))
+	  (setq continue-flag nil)
+	(progn
+	  (setq l1 (cdr l1))
+	  (setq l2 (cdr l2)))))
 
-    (concat 
+    (concat
      (make-string (length l2) ?\!)
      (mapconcat 'identity l1 "."))))
 
@@ -465,15 +465,15 @@ inserted is calculated relative to the current context.  See
   (interactive)
   (when (not taskjuggler-tasks)
     (taskjuggler-rescan-tasks))
-  (let ((completion 
-         (completing-read
-          "Depend on Task: "
-          (mapcar 'first taskjuggler-tasks))))
+  (let ((completion
+	 (completing-read
+	  "Depend on Task: "
+	  (mapcar 'first taskjuggler-tasks))))
     (when completion
       (insert "depends "
-              (taskjuggler-make-dependeny-path 
-               completion
-               (taskjuggler-current-context-path))))))
+	      (taskjuggler-make-dependeny-path
+	       completion
+	       (taskjuggler-current-context-path))))))
 
 (defun taskjuggler-insert-resource ()
   "Insert a resource at point with completion and context.
@@ -482,45 +482,45 @@ If a keyword having a resource argument is found in the current line
 before point the user will be asked for the resource only and that
 will be inserted.  Otherwise this function asks for the keyword to use
 \(again with completion).  See also:
-`taskjuggler-keywords-having-resource-arg'." 
+`taskjuggler-keywords-having-resource-arg'."
   (interactive)
   (when (not taskjuggler-resources)
     (taskjuggler-rescan-resources))
   (let ((pos (point)))
-      (unless 
-          (save-excursion
-            (beginning-of-line)
-            (re-search-forward
-               (regexp-opt 
-                taskjuggler-keywords-having-resource-arg
-                'word) 
-               pos t))
-        (insert (completing-read
-                 "Insert Keyword: "
-                 taskjuggler-keywords-having-resource-arg))
-        (insert " ")))
+      (unless
+	  (save-excursion
+	    (beginning-of-line)
+	    (re-search-forward
+	       (regexp-opt
+		taskjuggler-keywords-having-resource-arg
+		'word)
+	       pos t))
+	(insert (completing-read
+		 "Insert Keyword: "
+		 taskjuggler-keywords-having-resource-arg))
+	(insert " ")))
   (insert (completing-read
-            "Resource: " 
-            (mapcar #'(lambda (elm)
-                        (last (split-string (first elm)  "\\.")))
-                    taskjuggler-resources)
-            nil t)))
+	    "Resource: "
+	    (mapcar #'(lambda (elm)
+			(last (split-string (first elm)  "\\.")))
+		    taskjuggler-resources)
+	    nil t)))
 
 ;; Earlier versions tried to complete word at point and only complete
 ;; the available tasks depending on current context and number of
 ;; exclamation marks.  My brain hurts...
 ;; (defun taskjuggler-make-task-completion-table (context hierarchy)
 ;;   (let ((substr-size (length context)))
-;;   (remove-if 
+;;   (remove-if
 ;;    #'null
-;;    (mapcar 
-;;     #'(lambda (elm) 
+;;    (mapcar
+;;     #'(lambda (elm)
 ;;         (message "Hier %s Elm%s" hierarchy elm)
 ;;         (if (and (= (second elm) (1+ hierarchy))
 ;;                  (or (not context)
 ;;                      (string= (substring
 ;;                                (first elm) 0 (min (length (first elm))
-;;                                                   substr-size)) 
+;;                                                   substr-size))
 ;;                           context)))
 ;;             (third elm)
 ;;           nil))
@@ -547,7 +547,7 @@ will be inserted.  Otherwise this function asks for the keyword to use
 ;;              )))
 ;;     (completing-read "Task: "
 ;;                      (taskjuggler-make-task-completion-table
-;;                       completion-path (- current-hier up-hierarchy)) 
+;;                       completion-path (- current-hier up-hierarchy))
 ;;                      nil t word-at-point)))
 
 ;; (defun taskjuggler-complete-dependency ()
@@ -561,16 +561,16 @@ will be inserted.  Otherwise this function asks for the keyword to use
 ;;     )
 ;;     (message "Context %s  CompPath %s UpHier %d ThHier %d"
 ;;              current-context completion-path up-hierarchy current-hier)))
-;;          (comp (completing-read 
+;;          (comp (completing-read
 ;;                 "Task: " (taskjuggler-make-task-completion-table
 ;;                           completion-path current-hier))))))
 
 ;; Inserting code
-(define-skeleton taskjuggler-insert-task 
+(define-skeleton taskjuggler-insert-task
   "Insert a new task."
   "Name of the task: "
   "task " str " \"" _ "\" {\n\n}")
-(define-skeleton taskjuggler-insert-resource-def 
+(define-skeleton taskjuggler-insert-resource-def
   "Insert a new resource."
   "Name of the resource: "
   "resource " str " \"" _ "\" {\n\n}")
@@ -579,11 +579,11 @@ will be inserted.  Otherwise this function asks for the keyword to use
 (defun taskjuggler-build-compile-command (buffer &optional args)
   (concat "tj3 "
 	  "--no-color "
-          (cond 
-           ((listp args) (mapconcat 'identity args " "))
-           ((stringp args) args))
-          " "
-          (buffer-file-name buffer)))
+	  (cond
+	   ((listp args) (mapconcat 'identity args " "))
+	   ((stringp args) args))
+	  " "
+	  (buffer-file-name buffer)))
 
 (defun taskjuggler-compile ()
   (interactive)
@@ -636,12 +636,12 @@ will be inserted.  Otherwise this function asks for the keyword to use
   (make-local-variable 'comment-start-skip)
 
   (setq comment-start "# "
-        comment-end ""
-        comment-start-skip "#+[ \t]*")
+	comment-end ""
+	comment-start-skip "#+[ \t]*")
 
   (set-syntax-table taskjuggler-mode-syntax-table)
 
-  (set (make-local-variable 'indent-line-function) 'taskjuggler-indent-line) 
+  (set (make-local-variable 'indent-line-function) 'taskjuggler-indent-line)
   (use-local-map taskjuggler-mode-map)
   ;; Setting up font-locking
   (make-local-variable 'font-lock-defaults)
