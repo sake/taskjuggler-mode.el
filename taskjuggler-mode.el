@@ -37,8 +37,15 @@
 ;; So it's kudos to Sean Dague (http://dague.net) for that older
 ;; version.  In his code he praised Scott Andrew Borton for writing a
 ;; very good tutorial on writing modes.
+
+
+;;; Installation:
+;; To install, just drop this file into a directory in your
+;; `load-path' and (optionally) byte-compile it.  To automatically
+;; handle files ending in '.yml', add something like:
 ;;
 ;; Webpage: http://www.skamphausen.de/cgi-bin/ska/taskjuggler-mode
+;;    (require 'taskjuggler-mode)
 
 ;;; FIXMEs
 ;; * The parser is called too often!
