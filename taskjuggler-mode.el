@@ -67,6 +67,8 @@
 ;; * Validation of dependencies
 
 
+;;; Code:
+
 (defvar taskjuggler-mode-hook nil)
 
 (defconst taskjuggler-properties
