@@ -1,8 +1,13 @@
-;;; taskjuggler-mode.el --- Editing Taskjuggler Files
+;;; taskjuggler-mode.el --- Editing Taskjuggler Files  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2008 by Stefan Kamphausen
 ;; Author: Stefan Kamphausen <http://www.skamphausen.de>
-;; Keywords: user
+;;         Tobias Wich <mrfancypants@electrologic.org>
+;; Maintainer: Tobias Wich <mrfancypants@electrologic.org>
+;; Version: 1.0
+;; Keywords: tj3 taskjuggler
+;; URL: https://github.com/sake/taskjuggler-mode.el
+
 ;; This file is not part of Emacs.
 
 ;; This program is free software; you can redistribute it and/or modify it
@@ -53,6 +58,7 @@
 ;; * Sorting of tasks in a context: by name, by priority
 ;; * Highlighting of priority according to value
 ;; * Validation of dependencies
+
 
 (defvar taskjuggler-mode-hook nil)
 
@@ -623,6 +629,7 @@ will be inserted.  Otherwise this function asks for the keyword to use
   (modify-syntax-entry ?\n ">" taskjuggler-mode-syntax-table))
 
 
+;;;###autoload
 (defun taskjuggler-mode ()
   "Major mode for editing TaskJuggler input files.
 
@@ -651,9 +658,15 @@ will be inserted.  Otherwise this function asks for the keyword to use
   (setq mode-name "TaskJuggler")
   (run-hooks 'taskjuggler-mode-hook))
 
+;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.tjp\\'" . taskjuggler-mode))
+;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.tji\\'" . taskjuggler-mode))
+;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.tjsp\\'" . taskjuggler-mode))
 
 
 (provide 'taskjuggler-mode)
+
+
+;;; taskjuggler-mode.el ends here
