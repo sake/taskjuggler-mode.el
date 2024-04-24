@@ -44,7 +44,6 @@
 ;; `load-path' and (optionally) byte-compile it.  To automatically
 ;; handle files ending in '.yml', add something like:
 ;;
-;; Webpage: http://www.skamphausen.de/cgi-bin/ska/taskjuggler-mode
 ;;    (require 'taskjuggler-mode)
 
 ;;; FIXMEs
