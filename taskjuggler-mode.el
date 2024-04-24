@@ -578,6 +578,7 @@ will be inserted.  Otherwise this function asks for the keyword to use
 ;; Compile
 (defun taskjuggler-build-compile-command (buffer &optional args)
   (concat "tj3 "
+	  "--no-color "
           (cond 
            ((listp args) (mapconcat 'identity args " "))
            ((stringp args) args))
