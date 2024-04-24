@@ -577,7 +577,7 @@ will be inserted.  Otherwise this function asks for the keyword to use
 
 ;; Compile
 (defun taskjuggler-build-compile-command (buffer &optional args)
-  (concat "taskjuggler "
+  (concat "tj3 "
           (cond 
            ((listp args) (mapconcat 'identity args " "))
            ((stringp args) args))
@@ -591,7 +591,7 @@ will be inserted.  Otherwise this function asks for the keyword to use
 
 (defun taskjuggler-check-syntax ()
   (interactive)
-  (let ((cmd (taskjuggler-build-compile-command (current-buffer) "-s")))
+  (let ((cmd (taskjuggler-build-compile-command (current-buffer) "--check-syntax")))
     (compile cmd)))
 
 ;; Map
