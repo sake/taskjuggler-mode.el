@@ -46,7 +46,8 @@
 ;;
 ;;    (require 'taskjuggler-mode)
 
-;;; FIXMEs
+
+;;; FIXMEs:
 ;; * The parser is called too often!
 ;; * The parser should be able to return several results in one call
 ;; * Cleanup repetion of task vs resources.
@@ -54,13 +55,13 @@
 ;; * What about buffer local variants of tasks and resources?
 ;; * support supplement
 
-;;; TODO
+;;; TODO:
 ;; * Context-sensitive highlighting, e.g. columns in reports
 ;; * Ad-Hoc highlighting of things in buffer, e.g. task names,
 ;;   resource names.
 ;; * Viewing of results, either using TaskjugglerUI or HTML-reports
 
-;;; More Ideas
+;;; More Ideas:
 ;; * Sorting of tasks in a context: by name, by priority
 ;; * Highlighting of priority according to value
 ;; * Validation of dependencies
